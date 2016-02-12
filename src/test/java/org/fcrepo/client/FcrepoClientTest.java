@@ -368,7 +368,7 @@ public class FcrepoClientTest {
 
         doSetupMockRequest(null, new ByteArrayEntity(responseText.getBytes()), status);
 
-        final FcrepoResponse response = testClient.post(uri, null, null);
+        final FcrepoResponse response = testClient.post(uri, null, (String)null);
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);

@@ -15,14 +15,6 @@
  */
 package org.fcrepo.client;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -33,6 +25,16 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Represents a client to interact with Fedora's HTTP API.
@@ -171,6 +173,7 @@ public class FcrepoClient {
 
     /**
      * Make a POST request
+     *
      * @param url the URL of the resource to which to POST
      * @param body the content to be sent to the server
      * @param contentType the Content-Type of the body
@@ -179,13 +182,28 @@ public class FcrepoClient {
      */
     public FcrepoResponse post(final URI url, final InputStream body, final String contentType)
             throws FcrepoOperationFailedException {
+        final Map<String, String> headers = new HashMap<>(1);
+        headers.put(CONTENT_TYPE, contentType);
+        return post(url, body, headers);
+    }
+
+    /**
+     * Make a POST request
+     *
+     * @param url     the URL of the resource to which to POST
+     * @param body    the content to be sent to the server
+     * @param headers a map of HTTP header names and values, keyed by the header name
+     * @return the repository response
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public FcrepoResponse post(final URI url, final InputStream body, final Map<String, String> headers)
+            throws FcrepoOperationFailedException {
 
         final HttpMethods method = HttpMethods.POST;
-        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)method.createRequest(url);
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) method.createRequest(url);
 
-        if (contentType != null) {
-            request.addHeader(CONTENT_TYPE, contentType);
-        }
+        headers.entrySet().forEach((header) -> request.addHeader(header.getKey(), header.getValue()));
+
         if (body != null) {
             request.setEntity(new InputStreamEntity(body));
         }
@@ -198,6 +216,8 @@ public class FcrepoClient {
 
         return fcrepoGenericResponse(url, response, throwExceptionOnFailure);
     }
+
+
 
     /**
      * Make a DELETE request
